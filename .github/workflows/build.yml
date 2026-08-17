@@ -49,8 +49,16 @@ jobs:
             "platforms;android-33" \
             "build-tools;33.0.2"
 
+            - name: Vérifier AIDL
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          find "$ANDROID_HOME" -name aidl -type f -print
+
       - name: Construire MD AI
         run: |
+          export PATH="$ANDROID_HOME/build-tools/33.0.2:$ANDROID_HOME/platform-tools:$PATH"
+          export AIDL="$ANDROID_HOME/build-tools/33.0.2/aidl"
           buildozer android debug
 
       - name: Recuperer l'APK
