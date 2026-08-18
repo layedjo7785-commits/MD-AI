@@ -1,68 +1,93 @@
-import tkinter as tk
+from kivy.app import App
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.label import Label
+from kivy.uix.textinput import TextInput
+from kivy.uix.button import Button
 
-fenetre = tk.Tk()
-fenetre.title("MD AI 🤖")
-fenetre.geometry("400x650")
 
-titre = tk.Label(
-    fenetre,
-    text="MD AI 🤖",
-    font=("Arial", 24, "bold")
-)
-titre.pack(pady=10)
+class MDAI(App):
 
-conversation = tk.Text(
-    fenetre,
-    font=("Arial", 12),
-    wrap="word"
-)
-conversation.pack(
-    padx=10,
-    pady=10,
-    fill="both",
-    expand=True
-)
+    def build(self):
+        layout = BoxLayout(
+            orientation="vertical",
+            padding=10,
+            spacing=10
+        )
 
-zone = tk.Frame(fenetre)
-zone.pack(fill="x", padx=10, pady=10)
+        titre = Label(
+            text="MD AI 🤖",
+            font_size=28,
+            size_hint_y=None,
+            height=60
+        )
+        layout.add_widget(titre)
 
-champ = tk.Entry(
-    zone,
-    font=("Arial", 14)
-)
-champ.pack(
-    side="left",
-    fill="x",
-    expand=True
-)
+        self.conversation = Label(
+            text="MD AI : Bonjour Mamadou 👋\nJe suis prêt à discuter avec toi.",
+            font_size=18,
+            halign="left",
+            valign="top"
+        )
+        layout.add_widget(self.conversation)
 
-def envoyer(event=None):
-    message = champ.get().strip()
+        zone = BoxLayout(
+            size_hint_y=None,
+            height=55,
+            spacing=5
+        )
 
-    if message == "":
-        return
+        self.champ = TextInput(
+            hint_text="Écris ton message...",
+            multiline=False,
+            font_size=18
+        )
+        zone.add_widget(self.champ)
 
-    conversation.insert(
-        tk.END,
-        "Toi : " + message + "\n"
-    )
+        bouton = Button(
+            text="Envoyer",
+            font_size=16,
+            size_hint_x=None,
+            width=100
+        )
+        bouton.bind(on_press=self.envoyer)
+        zone.add_widget(bouton)
 
-    conversation.insert(
-        tk.END,
-        "MD AI : Je t'écoute 🤖💬\n\n"
-    )
+        layout.add_widget(zone)
 
-    champ.delete(0, tk.END)
+        return layout
 
-bouton = tk.Button(
-    zone,
-    text="Envoyer",
-    font=("Arial", 12),
-    command=envoyer
-)
-bouton.pack(side="right", padx=(5, 0))
+    def envoyer(self, instance):
+        message = self.champ.text.strip()
 
-champ.bind("<Return>", envoyer)
+        if not message:
+            return
 
-fenetre.mainloop()
-        
+        reponse = self.repondre(message)
+
+        self.conversation.text += (
+            "\n\nToi : " + message +
+            "\nMD AI : " + reponse
+        )
+
+        self.champ.text = ""
+
+    def repondre(self, message):
+        texte = message.lower()
+
+        if "bonjour" in texte or "salut" in texte:
+            return "Bonjour 👋 Je suis MD AI !"
+
+        if "comment tu vas" in texte:
+            return "Je vais très bien 🤖 Et toi ?"
+
+        if "ton nom" in texte or "qui es-tu" in texte:
+            return "Je suis MD AI, ton assistant personnel 🤖."
+
+        if "couleur" in texte:
+            return "Ta couleur préférée est le bleu 💙."
+
+        return "Je t'écoute. Dis-moi quelque chose ! 💬"
+
+
+if __name__ == "__main__":
+    MDAI().run()
