@@ -3,6 +3,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.button import Button
+from kivy.uix.scrollview import ScrollView
 
 
 class MDAI(App):
@@ -20,15 +21,24 @@ class MDAI(App):
             size_hint_y=None,
             height=60
         )
+
         layout.add_widget(titre)
 
         self.conversation = Label(
-            text="MD AI : Bonjour Mamadou 👋\nJe suis prêt à discuter avec toi.",
+            text="MD AI : Bonjour Mamadou 👋\n\n",
             font_size=18,
             halign="left",
-            valign="top"
+            valign="top",
+            size_hint_y=None
         )
-        layout.add_widget(self.conversation)
+
+        self.conversation.bind(
+            texture_size=self.conversation.setter("size")
+        )
+
+        scroll = ScrollView()
+        scroll.add_widget(self.conversation)
+        layout.add_widget(scroll)
 
         zone = BoxLayout(
             size_hint_y=None,
@@ -37,19 +47,20 @@ class MDAI(App):
         )
 
         self.champ = TextInput(
-            hint_text="Écris ton message...",
+            hint_text="Écris à MD AI...",
             multiline=False,
             font_size=18
         )
-        zone.add_widget(self.champ)
 
         bouton = Button(
             text="Envoyer",
-            font_size=16,
             size_hint_x=None,
             width=100
         )
+
         bouton.bind(on_press=self.envoyer)
+
+        zone.add_widget(self.champ)
         zone.add_widget(bouton)
 
         layout.add_widget(zone)
@@ -59,35 +70,15 @@ class MDAI(App):
     def envoyer(self, instance):
         message = self.champ.text.strip()
 
-        if not message:
+        if message == "":
             return
 
-        reponse = self.repondre(message)
-
         self.conversation.text += (
-            "\n\nToi : " + message +
-            "\nMD AI : " + reponse
+            "Toi : " + message + "\n"
+            "MD AI : Je t'écoute 🤖💬\n\n"
         )
 
         self.champ.text = ""
 
-    def repondre(self, message):
-        texte = message.lower()
 
-        if "bonjour" in texte or "salut" in texte:
-            return "Bonjour 👋 Je suis MD AI !"
-
-        if "comment tu vas" in texte:
-            return "Je vais très bien 🤖 Et toi ?"
-
-        if "ton nom" in texte or "qui es-tu" in texte:
-            return "Je suis MD AI, ton assistant personnel 🤖."
-
-        if "couleur" in texte:
-            return "Ta couleur préférée est le bleu 💙."
-
-        return "Je t'écoute. Dis-moi quelque chose ! 💬"
-
-
-if __name__ == "__main__":
-    MDAI().run()
+MDAI().run()
