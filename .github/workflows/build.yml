@@ -22,7 +22,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Installer les dependances systeme
+      - name: Installer dependances systeme
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -31,8 +31,7 @@ jobs:
             libtool \
             pkg-config \
             zip \
-            unzip \
-            openjdk-17-jdk
+            unzip
 
       - name: Installer Buildozer
         run: |
@@ -40,10 +39,54 @@ jobs:
           pip install "buildozer==1.5.0"
           pip install "cython<3"
 
-      - name: Nettoyer ancien environnement Buildozer
+      - name: Nettoyer Buildozer
         run: |
           rm -rf ~/.buildozer
           rm -rf .buildozer
+
+      - name: Installer Android SDK et AIDL
+        run: |
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk"
+
+          export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
+
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH" >> "$GITHUB_ENV"
+
+          if [ ! -d "$ANDROID_HOME/cmdline-tools/latest" ]; then
+            mkdir -p "$ANDROID_HOME/cmdline-tools"
+
+            cd /tmp
+            wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            unzip -q commandlinetools-linux-11076708_latest.zip
+
+            mkdir -p "$ANDROID_HOME/cmdline-tools/latest"
+            cp -r cmdline-tools/* "$ANDROID_HOME/cmdline-tools/latest/"
+          fi
+
+          yes | sdkmanager --licenses >/dev/null || true
+
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-33" \
+            "build-tools;33.0.2"
+
+      - name: Verifier AIDL
+        run: |
+          export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+
+          echo "SDK utilisé : $ANDROID_HOME"
+          echo "Recherche de AIDL :"
+
+          find "$ANDROID_HOME/build-tools" -name aidl -type f -print
+
+          test -f "$ANDROID_HOME/build-tools/33.0.2/aidl"
+
+          "$ANDROID_HOME/build-tools/33.0.2/aidl" --version
 
       - name: Construire MD AI
         run: |
