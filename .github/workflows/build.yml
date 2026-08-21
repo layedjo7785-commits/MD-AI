@@ -3,38 +3,51 @@ name: Build MD AI APK
 on:
   workflow_dispatch:
 
-env:
-  PYTHONFORANDROID_PREREQUISITES_INSTALL_INTERACTIVE: 0
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Recuperer le projet
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Installer Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.11"
 
       - name: Installer Java
         uses: actions/setup-java@v5
         with:
+          distribution: temurin
           java-version: "17"
-          distribution: "temurin"
 
-      - name: Installer les dependances Linux
+      - name: Installer dependances Linux
         run: |
-          sudo apt update
-          sudo apt install -y automake libltdl-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            openjdk-17-jdk \
+            python3-pip \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libtinfo6 \
+            cmake \
+            libffi-dev \
+            libssl-dev
 
       - name: Installer Buildozer
         run: |
-          python -m pip install --upgrade pip
-          pip install .
-          pip install "cython<3"
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install buildozer
+          python -m pip install "cython<3"
 
       - name: Construire MD AI
         run: |
